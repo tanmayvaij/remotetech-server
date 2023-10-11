@@ -1,11 +1,20 @@
 import express from "express";
+import { rootRouter } from "./routes";
+import { databaseConnection } from "./connection";
+import { config } from "dotenv";
+
+const PORT = 5000;
+
+config();
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.json({ message: "Hello World" });
-});
+app.use(express.json());
 
-app.listen(5000, () => {
-  console.log("RemoteTech Server started on port 5000 successfully");
+app.use("/", rootRouter);
+
+databaseConnection();
+
+app.listen(PORT, () => {
+  console.log(`RemoteTech Server started on port ${PORT} successfully`);
 });
