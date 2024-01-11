@@ -1,20 +1,29 @@
 import { compare } from "bcrypt";
 import { Request, Response } from "express";
-import { User } from "../models";
+import { Log, User } from "../models";
 import { sign } from "jsonwebtoken";
 
 export const userLogin = async (req: Request, res: Response) => {
+  const event = "USER_LOGIN";
+
   const userCredentials: UserCredentials = req.body;
 
   const { email, password } = userCredentials;
 
   const user = await User.findOne({ email });
 
-  if (!user)
+  if (!user) {
+    await Log.create({
+      event,
+      message: `Login failed with ${JSON.stringify(userCredentials)}`,
+      timestamp: new Date().toLocaleString(),
+    });
+
     return res.json({
-      success: false,
+      status: false,
       message: `invalid credentials`,
     });
+  }
 
   const isPasswordMatched = await compare(password.trim(), user.password);
 
@@ -25,5 +34,11 @@ export const userLogin = async (req: Request, res: Response) => {
 
   const authToken = sign(payload, process.env.JWT_SECRET_KEY as string);
 
-  res.json({ success: true, authToken });
+  await Log.create({
+    event,
+    message: `Login successful for ${JSON.stringify(user._id)}`,
+    timestamp: new Date().toLocaleString(),
+  });
+
+  res.json({ status: true, authToken });
 };

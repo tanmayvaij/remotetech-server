@@ -16,7 +16,20 @@ export const User = model<UserDocument>(
     email: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      required: true,
+      enum: ["student", "admin"],
+    },
+    joinedOn: {
+      type: String,
+      required: true,
     },
     password: {
       type: String,
